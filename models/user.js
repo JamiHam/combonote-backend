@@ -14,7 +14,7 @@ User.init({
     unique: true,
     allowNull: false
   },
-  password: {
+  passwordHash: {
     type: DataTypes.STRING,
     allowNull: false
   }
