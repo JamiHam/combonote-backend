@@ -15,8 +15,18 @@ const unknownEndpoint = (request, response) => {
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message)
 
-  switch (error.name) {
-    
+  switch(error.name) {
+    case 'SequelizeDatabaseError':
+      next(error)
+  }
+
+  next(error)
+}
+
+const sequelizeErrorHandler = (error, request, response, next) => {
+  switch(error.original.code) {
+    case '22P02':
+      return response.status(400).send({ error: 'malformatted id' })
   }
 
   next(error)
@@ -25,5 +35,6 @@ const errorHandler = (error, request, response, next) => {
 module.exports = {
   requestLogger,
   unknownEndpoint,
-  errorHandler
+  errorHandler,
+  sequelizeErrorHandler
 }

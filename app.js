@@ -13,6 +13,7 @@ app.use('/api/users', userRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
+app.use(middleware.sequelizeErrorHandler)
 
 const start = async () => {
   await connect()

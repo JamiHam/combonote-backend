@@ -5,22 +5,31 @@ const bcrypt = require('bcrypt')
 
 const { User } = require('../models')
 
-router.get('/', async (req, res) => {
+router.get('/', async (request, response) => {
   const users = await User.findAll()
-  res.json(users)
+  response.json(users)
 })
 
-router.post('/', async (req, res) => {
+router.get('/:id', async (request, response, next) => {
   try {
-    const { username, password } = req.body
+    const user = await User.findByPk(request.params.id)
+    response.json(user)
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/', async (request, response, next) => {
+  try {
+    const { username, password } = request.body
 
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(password, saltRounds)
 
     const user = await User.create({ username, passwordHash })
-    res.json(user)
+    response.json(user)
   } catch (error) {
-    res.status(400).json({ error })
+    next(error)
   }
 })
 
