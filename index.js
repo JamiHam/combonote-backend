@@ -1,18 +1,7 @@
-const express = require('express')
-const app = express()
+const app = require('./app')
+const { PORT } = require('./utils/config')
+const logger = require('./utils/logger')
 
-const { PORT } = require('./util/config')
-const { connect } = require('./util/db')
-const userRouter = require('./routers/userRouter')
-
-app.use(express.json())
-app.use('/api/users', userRouter)
-
-const start = async () => {
-  await connect()
-  app.listen(PORT, () => {
-    console.log('Server running on port', PORT)
-  })
-}
-
-start()
+app.listen(PORT, () => {
+  logger.info('Server running on port', PORT)
+})
