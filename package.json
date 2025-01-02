@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "dev": "nodemon index.js"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test node --test"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -10,6 +12,8 @@
     "sequelize": "^6.37.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0"
   }
 }
