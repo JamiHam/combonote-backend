@@ -1,13 +1,13 @@
 const { Model, DataTypes } = require('sequelize')
 const { sequelize } = require('../utils/db')
 
-class Field extends Model {}
+class RowColumn extends Model {}
 
-Field.init({
-  noteId: {
+RowColumn.init({
+  rowId: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    references: { model: 'notes', key: 'id' }
+    references: { model: 'rows', key: 'id' }
   },
   columnId: {
     type: DataTypes.INTEGER,
@@ -21,7 +21,7 @@ Field.init({
   sequelize,
   underscored: true,
   timestamps: false,
-  modelName: 'field'
+  modelName: 'row_column'
 })
 
-module.exports = Field
+module.exports = RowColumn
