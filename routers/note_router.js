@@ -29,7 +29,7 @@ noteRouter.post('/', async (request, response, next) => {
   note.userId = user.id
   await note.save()
   
-  response.json(note)
+  response.status(201).json(note)
 })
 
 module.exports = noteRouter
