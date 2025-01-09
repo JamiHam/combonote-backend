@@ -13,8 +13,27 @@ const unknownEndpoint = (request, response) => {
 }
 
 const errorHandler = (error, request, response, next) => {
-  logger.error(error.original.stack)
+  if (error.name.startsWith('Sequelize')) {
+    logger.error(error.original.stack)
+  } else {
+    logger.error(error.stack)
+  }
+  
+  switch(error.name) {
+    case 'SequelizeDatabaseError':
+      return response.status(400).send({ error: 'malformatted id' })
+    case 'SequelizeUniqueConstraintError':
+      return response.status(409).send({ error: 'username unavailable' })
+    case 'JsonWebTokenError':
+      return response.status(400).json({ error: 'invalid or missing token' })
+  }
 
+  error(next)
+}
+
+/*const sequelizeErrorHandler = (error, request, response, next) => {
+  logger.error(error.original.stack)
+  
   switch(error.original.code) {
     case '22P02':
       return response.status(400).send({ error: 'malformatted id' })
@@ -23,7 +42,7 @@ const errorHandler = (error, request, response, next) => {
   }
 
   next(error)
-}
+}*/
 
 module.exports = {
   requestLogger,
