@@ -25,7 +25,7 @@ const errorHandler = (error, request, response, next) => {
     case 'SequelizeUniqueConstraintError':
       return response.status(409).send({ error: 'username unavailable' })
     case 'JsonWebTokenError':
-      return response.status(400).json({ error: 'invalid or missing token' })
+      return response.status(401).json({ error: 'invalid or missing token' })
   }
 
   error(next)
