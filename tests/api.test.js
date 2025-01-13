@@ -8,80 +8,62 @@ const { sequelize } = require('../utils/db')
 const { User } = require('../models')
 const { getToken, createUser } = require('./test_helper')
 
-const newUser = {
-  username: 'Alice',
-  password: 'password123'
-}
-
 beforeEach(async () => {
   await User.truncate({ cascade: true })
 })
 
-describe('creating a new user', async () => {
-  test('succeeds with valid data', async () => {
-    await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(201)
-  })
-
-  test('fails if the username already exists', async () => {
-    await User.create({ username: 'Alice', passwordHash: 'passwordHash' })
-    
-    await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(409)
-  })
-})
-
-test('passwords are not stored as plaintext', async () => {
-  const createdUser = await api
-    .post('/api/users')
-    .send(newUser)
+describe('when the database is empty', async () => {
+  describe('creating a new user', async () => {
+    test('succeeds with valid data', async () => {
+      await api
+        .post('/api/users')
+        .send({ username: 'Alice', password: 'password' })
+        .expect(201)
+    })
   
-  assert.notEqual(newUser.password, createdUser.body.passwordHash)
+    test('fails if the username already exists', async () => {
+      await createUser('Alice', 'password')
+      
+      await api
+        .post('/api/users')
+        .send({ username: 'Alice', password: 'password' })
+        .expect(409)
+    })
+  })
+  
+  test('passwords are not stored as plaintext', async () => {
+    const createdUser = await api
+      .post('/api/users')
+      .send({ username: 'Alice', password: 'password' })
+    
+    assert.notEqual(createdUser.body.passwordHash, 'password')
+  })
 })
 
 describe('when there is a user in the database', async () => {
   beforeEach(async () => {
-    await api
-      .post('/api/users')
-      .send(newUser)
+    await createUser('Alice', 'password')
   })
 
   describe('login', async () => {
     test('succeeds with correct username and password', async () => {
       await api
         .post('/api/login')
-        .send({
-          username: 'Alice',
-          password: 'password123'
-        })
+        .send({ username: 'Alice', password: 'password' })
         .expect(200)
     })
     
     test('fails with incorrect password', async () => {
       await api
         .post('/api/login')
-        .send({
-          username: 'Alice',
-          password: 'password321'
-        })
+        .send({ username: 'Alice', password: 'qwerty' })
         .expect(401)
     })
   })
 
   describe('creating a new note', async () => {
     test('succeeds while logged in', async () => {
-      const response = await api
-        .post('/api/login')
-        .send({
-          username: 'Alice',
-          password: 'password123'
-        })
-
-      const token = response.body.token
+      const token = await getToken('Alice', 'password')
 
       await api
         .post('/api/notes')
