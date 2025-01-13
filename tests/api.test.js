@@ -6,6 +6,7 @@ const api = supertest(app)
 
 const { sequelize } = require('../utils/db')
 const { User } = require('../models')
+const { getToken, createUser } = require('./test_helper')
 
 const newUser = {
   username: 'Alice',
@@ -85,93 +86,128 @@ describe('when there is a user in the database', async () => {
       await api
         .post('/api/notes')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'test_note' })
+        .send({ name: 'note' })
         .expect(201)
     })
   
     test ('fails while logged out', async () => {
       await api
         .post('/api/notes')
-        .send({ name: 'test_note' })
+        .send({ name: 'note' })
         .expect(401)
     })
   })
 })
 
-describe('creating a new table', async () => {
-  beforeEach(async () => {
-    await api
-      .post('/api/users')
-      .send({ username: 'Alice', password: 'password' })
+describe('when there are two users and a note in the database', async () => {
+  let noteId = null
 
-    await api
-      .post('/api/users')
-      .send({ username: 'Bob', password: 'password' })
+  beforeEach(async () => {
+    await createUser('Alice', 'password')
+    await createUser('Bob', 'password')
+    const token = await getToken('Alice', 'password')
 
     const response = await api
-      .post('/api/login')
-      .send({ username: 'Alice', password: 'password' })
-
-    const token = response.body.token
-
-    await api
       .post('/api/notes')
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'note_name' })
+      .send({ name: 'note' })
+
+    noteId = response.body.id
   })
 
-  const getToken = async (username, password) => {
-    const response = await api
-      .post('/api/login')
-      .send({ username, password })
-
-    return response.body.token
-  }
-
-  const getNoteId = async () => {
-    return noteId = (await api.get('/api/notes')).body[0].id
-  }
-
-  test('fails while not logged in', async () => {
-    const noteId = await getNoteId()
-
-    await api
-      .post('/api/tables')
-      .send({ name: 'table_name', noteId })
-      .expect(401)
+  describe('creating a new table', async () => {
+    test('fails while not logged in', async () => {
+      await api
+        .post('/api/tables')
+        .send({ name: 'table', noteId })
+        .expect(401)
+    })
+  
+    test('succeeds while logged in as the correct user', async () => {
+      const token = await getToken('Alice', 'password')
+  
+      await api
+        .post('/api/tables')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'table', noteId })
+        .expect(201)
+    })
+  
+    test('fails while logged in as the wrong user', async () => {
+      const token = await getToken('Bob', 'password')
+  
+      await api
+        .post('/api/tables')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'table', noteId })
+        .expect(403)
+    })
+  
+    test('fails when the selected note does not exist', async () => {
+      const token = await getToken('Alice', 'password')
+      noteId += 1
+  
+      await api
+        .post('/api/tables')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'table', noteId })
+        .expect(404)
+    })
   })
+  
+  describe('when there is a table in the database', async () => {
+    let tableId = null
 
-  test('succeeds while logged in as the correct user', async () => {
-    const token = await getToken('Alice', 'password')
-    const noteId = await getNoteId()
+    beforeEach(async () => {
+      const token = await getToken('Alice', 'password')
 
-    await api
-      .post('/api/tables')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'table_name', noteId })
-      .expect(201)
-  })
+      const response = await api
+        .post('/api/tables')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'note', noteId })
+      
+      tableId = response.body.id
+    })
 
-  test('fails while logged in as the wrong user', async () => {
-    const token = await getToken('Bob', 'password')
-    const noteId = await getNoteId()
+    describe('adding a new column to a table', async () => {
+      test('fails while not logged in', async () => {
+        await api
+          .post('/api/columns')
+          .send({ name: 'column', tableId })
+          .expect(401)
+      })
 
-    await api
-      .post('/api/tables')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'table_name', noteId })
-      .expect(403)
-  })
+      test('succeeds while logged in as the correct user', async () => {
+        const token = await getToken('Alice', 'password')
 
-  test('fails when the selected note does not exist', async () => {
-    const token = await getToken('Alice', 'password')
-    const noteId = await getNoteId() + 1
+        await api
+          .post('/api/columns')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ name: 'column', tableId })
+          .expect(201)
+      })
 
-    await api
-      .post('/api/tables')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'table_name', noteId })
-      .expect(404)
+      test('fails while logged in as the wrong user', async () => {
+        const token = await getToken('Bob', 'password')
+
+        await api
+          .post('/api/columns')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ name: 'column', tableId })
+          .expect(403)
+      })
+
+      test('fails when the selected table does not exist', async () => {
+        const token = await getToken('Alice', 'password')
+        tableId += 1
+
+        await api
+          .post('/api/columns')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ name: 'column', tableId })
+          .expect(404)
+      })
+    })
   })
 })
 
