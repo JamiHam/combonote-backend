@@ -190,6 +190,40 @@ describe('when there are two users and a note in the database', async () => {
           .expect(404)
       })
     })
+
+    describe('when there are columns in the database', async () => {
+      beforeEach(async () => {
+        const token = await getToken('Alice', 'password')
+
+        await api
+          .post('/api/columns')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ name: 'column1', tableId })
+
+        await api
+          .post('/api/columns')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ name: 'column2', tableId })
+      })
+
+      describe('fetching columns', async () => {
+        test('succeeds when table exists', async () => {
+          const response = await api.get(`/api/columns/${tableId}`)
+
+          assert.strictEqual(response.body.length, 2)
+          assert.strictEqual(response.body[0].name, 'column1')
+          assert.strictEqual(response.body[1].name, 'column2')
+        })
+
+        test('fails when table does not exist', async () => {
+          tableId += 1
+
+          await api
+            .get(`/api/columns/${tableId}`)
+            .expect(404)
+        })
+      })
+    })
   })
 })
 
