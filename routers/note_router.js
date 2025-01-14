@@ -24,7 +24,12 @@ noteRouter.post('/', async (request, response, next) => {
   const user = await User.findByPk(decodedToken.id)
   const note = Note.build(request.body)
   note.userId = user.id
-  await note.save()
+
+  try {
+    await note.save()
+  } catch (error) {
+    return next(error)
+  }
   
   response.status(201).json(note)
 })

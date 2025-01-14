@@ -17,18 +17,21 @@ const createUser = async (username, password) => {
 }
 
 const createNote = async (name, token) => {
-  await api
+  return await api
     .post('/api/notes')
     .set('Authorization', `Bearer ${token}`)
     .send({ name })
 }
 
-const createTable = async () => {
-
+const createTable = async (name, token) => {
+  return await api
+    .post('/api/tables')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ name })
 }
 
 const createColumn = async () => {
-  
+
 }
 
 module.exports = {

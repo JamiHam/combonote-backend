@@ -19,13 +19,6 @@ beforeEach(async () => {
 })
 
 describe('user', async () => {
-  test('can be created with valid data', async () => {
-    await api
-      .post('/api/users')
-      .send({ username: 'Alice', password: 'password' })
-      .expect(201)
-  })
-
   test('cannot be created if the username already exists', async () => {
     await createUser('Alice', 'password')
     
@@ -34,7 +27,14 @@ describe('user', async () => {
       .send({ username: 'Alice', password: 'password' })
       .expect(409)
   })
-  
+
+  test('can be created with valid data', async () => {
+    await api
+      .post('/api/users')
+      .send({ username: 'Alice', password: 'password' })
+      .expect(201)
+  })
+
   test('passwords are not stored as plaintext', async () => {
     const createdUser = await api
       .post('/api/users')
@@ -49,17 +49,9 @@ describe('login', async () => {
     await createUser('Alice', 'password')
   })
 
-  test('succeeds with correct username and password', async () => {
+  test('fails with no username or password', async () => {
     await api
       .post('/api/login')
-      .send({ username: 'Alice', password: 'password' })
-      .expect(200)
-  })
-  
-  test('fails with incorrect password', async () => {
-    await api
-      .post('/api/login')
-      .send({ username: 'Alice', password: 'qwerty' })
       .expect(401)
   })
 
@@ -70,19 +62,27 @@ describe('login', async () => {
       .expect(401)
   })
 
-  test('fails with no username or password', async () => {
+  test('fails with incorrect password', async () => {
     await api
       .post('/api/login')
+      .send({ username: 'Alice', password: 'qwerty' })
       .expect(401)
+  })
+
+  test('succeeds with correct username and password', async () => {
+    await api
+      .post('/api/login')
+      .send({ username: 'Alice', password: 'password' })
+      .expect(200)
   })
 })
 
-describe('creating a new note', async () => {
+describe('note', async () => {
   beforeEach(async () => {
     await createUser('Alice', 'password')
   })
 
-  test('succeeds while logged in', async () => {
+  test('can be created while logged in', async () => {
     const token = await getToken('Alice', 'password')
 
     await api
@@ -92,12 +92,74 @@ describe('creating a new note', async () => {
       .expect(201)
   })
 
-  test ('fails while logged out', async () => {
+  test ('cannot be created while logged out', async () => {
     await api
       .post('/api/notes')
       .send({ name: 'note' })
       .expect(401)
   })
+
+  test('cannot be created if name is not provided', async () => {
+    const token = await getToken('Alice', 'password')
+
+    await api
+      .post('/api/notes')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400)
+  })
+})
+
+describe('table', async () => {
+  let noteId = null
+
+  beforeEach(async () => {
+    await createUser('Alice', 'password')
+    await createUser('Bob', 'password')
+    const token = await getToken('Alice', 'password')
+    noteId = (await createNote('note', token)).body.id
+  })
+
+  test('cannot be created while not logged in', async () => {
+    await api
+      .post('/api/tables')
+      .send({ name: 'table', noteId })
+      .expect(401)
+  })
+
+  test('cannot be created while logged in as the wrong user', async () => {
+    const token = await getToken('Bob', 'password')
+
+    await api
+      .post('/api/tables')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'table', noteId })
+      .expect(403)
+  })
+
+  test('cannot be created when the specified note does not exist', async () => {
+    const token = await getToken('Alice', 'password')
+    noteId += 1
+
+    await api
+      .post('/api/tables')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'table', noteId })
+      .expect(404)
+  })
+
+  test('can be created while logged in as the correct user', async () => {
+    const token = await getToken('Alice', 'password')
+
+    await api
+      .post('/api/tables')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'table', noteId })
+      .expect(201)
+  })
+})
+
+describe('column', async () => {
+  
 })
 
 describe('when there are two users and a note in the database', async () => {
@@ -114,46 +176,6 @@ describe('when there are two users and a note in the database', async () => {
       .send({ name: 'note' })
 
     noteId = response.body.id
-  })
-
-  describe('creating a new table', async () => {
-    test('fails while not logged in', async () => {
-      await api
-        .post('/api/tables')
-        .send({ name: 'table', noteId })
-        .expect(401)
-    })
-  
-    test('succeeds while logged in as the correct user', async () => {
-      const token = await getToken('Alice', 'password')
-  
-      await api
-        .post('/api/tables')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'table', noteId })
-        .expect(201)
-    })
-  
-    test('fails while logged in as the wrong user', async () => {
-      const token = await getToken('Bob', 'password')
-  
-      await api
-        .post('/api/tables')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'table', noteId })
-        .expect(403)
-    })
-  
-    test('fails when the selected note does not exist', async () => {
-      const token = await getToken('Alice', 'password')
-      noteId += 1
-  
-      await api
-        .post('/api/tables')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'table', noteId })
-        .expect(404)
-    })
   })
   
   describe('when there is a table in the database', async () => {
