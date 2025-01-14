@@ -23,15 +23,18 @@ const createNote = async (name, token) => {
     .send({ name })
 }
 
-const createTable = async (name, token) => {
+const createTable = async (name, noteId, token) => {
   return await api
     .post('/api/tables')
     .set('Authorization', `Bearer ${token}`)
-    .send({ name })
+    .send({ name, noteId })
 }
 
-const createColumn = async () => {
-
+const createColumn = async (name, tableId, token) => {
+  return await api
+    .post('/api/columns')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ name, tableId })
 }
 
 module.exports = {

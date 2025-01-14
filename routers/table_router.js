@@ -29,7 +29,7 @@ tableRouter.post('/', async (request, response, next) => {
 
   const table = await Table.create(request.body)
 
-  return response.status(201).json(table)
+  response.status(201).json(table)
 })
 
 module.exports = tableRouter
