@@ -11,12 +11,30 @@ const getToken = async (username, password) => {
 }
 
 const createUser = async (username, password) => {
-  const response = await api
+  await api
     .post('/api/users')
     .send({ username, password })
+}
+
+const createNote = async (name, token) => {
+  await api
+    .post('/api/notes')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ name })
+}
+
+const createTable = async () => {
+
+}
+
+const createColumn = async () => {
+  
 }
 
 module.exports = {
   getToken,
   createUser,
+  createNote,
+  createTable,
+  createColumn
 }

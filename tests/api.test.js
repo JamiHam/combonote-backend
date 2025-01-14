@@ -6,29 +6,33 @@ const api = supertest(app)
 
 const { sequelize } = require('../utils/db')
 const { User } = require('../models')
-const { getToken, createUser } = require('./test_helper')
+const {
+  getToken,
+  createUser,
+  createNote,
+  createTable,
+  createColumn
+} = require('./test_helper')
 
 beforeEach(async () => {
   await User.truncate({ cascade: true })
 })
 
-describe('when the database is empty', async () => {
-  describe('creating a new user', async () => {
-    test('succeeds with valid data', async () => {
-      await api
-        .post('/api/users')
-        .send({ username: 'Alice', password: 'password' })
-        .expect(201)
-    })
-  
-    test('fails if the username already exists', async () => {
-      await createUser('Alice', 'password')
-      
-      await api
-        .post('/api/users')
-        .send({ username: 'Alice', password: 'password' })
-        .expect(409)
-    })
+describe('user', async () => {
+  test('can be created with valid data', async () => {
+    await api
+      .post('/api/users')
+      .send({ username: 'Alice', password: 'password' })
+      .expect(201)
+  })
+
+  test('cannot be created if the username already exists', async () => {
+    await createUser('Alice', 'password')
+    
+    await api
+      .post('/api/users')
+      .send({ username: 'Alice', password: 'password' })
+      .expect(409)
   })
   
   test('passwords are not stored as plaintext', async () => {
@@ -40,44 +44,59 @@ describe('when the database is empty', async () => {
   })
 })
 
-describe('when there is a user in the database', async () => {
+describe('login', async () => {
   beforeEach(async () => {
     await createUser('Alice', 'password')
   })
 
-  describe('login', async () => {
-    test('succeeds with correct username and password', async () => {
-      await api
-        .post('/api/login')
-        .send({ username: 'Alice', password: 'password' })
-        .expect(200)
-    })
-    
-    test('fails with incorrect password', async () => {
-      await api
-        .post('/api/login')
-        .send({ username: 'Alice', password: 'qwerty' })
-        .expect(401)
-    })
+  test('succeeds with correct username and password', async () => {
+    await api
+      .post('/api/login')
+      .send({ username: 'Alice', password: 'password' })
+      .expect(200)
+  })
+  
+  test('fails with incorrect password', async () => {
+    await api
+      .post('/api/login')
+      .send({ username: 'Alice', password: 'qwerty' })
+      .expect(401)
   })
 
-  describe('creating a new note', async () => {
-    test('succeeds while logged in', async () => {
-      const token = await getToken('Alice', 'password')
+  test('fails with nonexistent username', async () => {
+    await api
+      .post('/api/login')
+      .send({ username: 'Bob', password: 'password' })
+      .expect(401)
+  })
 
-      await api
-        .post('/api/notes')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'note' })
-        .expect(201)
-    })
-  
-    test ('fails while logged out', async () => {
-      await api
-        .post('/api/notes')
-        .send({ name: 'note' })
-        .expect(401)
-    })
+  test('fails with no username or password', async () => {
+    await api
+      .post('/api/login')
+      .expect(401)
+  })
+})
+
+describe('creating a new note', async () => {
+  beforeEach(async () => {
+    await createUser('Alice', 'password')
+  })
+
+  test('succeeds while logged in', async () => {
+    const token = await getToken('Alice', 'password')
+
+    await api
+      .post('/api/notes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'note' })
+      .expect(201)
+  })
+
+  test ('fails while logged out', async () => {
+    await api
+      .post('/api/notes')
+      .send({ name: 'note' })
+      .expect(401)
   })
 })
 
@@ -226,6 +245,50 @@ describe('when there are two users and a note in the database', async () => {
     })
   })
 })
+
+/*describe('row', async () => {
+  beforeEach(async () => {
+
+  })
+
+  test('cannot be created while not logged in', async () => {
+    await api
+      .post('/api/rows')
+      .send({ tableId })
+      .expect(401)
+  })
+
+  test('can be added while logged in as the correct user', async () => {
+    const token = getToken('Alice', 'password')
+
+    await api
+      .post('/api/rows')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ tableId })
+      .expect(201)
+  })
+
+  test('cannot be added while logged in as the wrong user', async () => {
+    const token = getToken('Bob', 'password')
+
+    await api
+      .post('/api/rows')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ tableId })
+      .expect(403)
+  })
+
+  test('cannot be added when the specified table does not exist', async () => {
+    const token = getToken('Alice', 'password')
+    tableId += 1
+
+    await api
+      .post('/api/rows')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ tableId })
+      .expect(404)
+  })
+})*/
 
 after(async () => {
   await sequelize.close()
