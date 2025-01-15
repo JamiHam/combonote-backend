@@ -37,10 +37,18 @@ const createColumn = async (name, tableId, token) => {
     .send({ name, tableId })
 }
 
+const createRow = async (tableId, token) => {
+  return await api
+    .post('/api/rows')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ tableId })
+}
+
 module.exports = {
   getToken,
   createUser,
   createNote,
   createTable,
-  createColumn
+  createColumn,
+  createRow
 }
