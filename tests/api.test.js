@@ -11,7 +11,8 @@ const {
   createUser,
   createNote,
   createTable,
-  createColumn
+  createColumn,
+  createRow
 } = require('./test_helper')
 
 beforeEach(async () => {
@@ -236,15 +237,13 @@ describe('column', async () => {
 describe('row', async () => {
   let noteId = null
   let tableId = null
-  let columnId = null
-
+  
   beforeEach(async () => {
     await createUser('Alice', 'password')
     await createUser('Bob', 'password')
     const token = await getToken('Alice', 'password')
     noteId = (await createNote('note', token)).body.id
     tableId = (await createTable('table', noteId, token)).body.id
-    columnId = (await createColumn('column', tableId, token)).body.id
   })
 
   test('cannot be created while not logged in', async () => {
@@ -283,6 +282,74 @@ describe('row', async () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ tableId })
       .expect(404)
+  })
+
+  describe('editing fields', async () => {
+    let columnId = null
+    let rowId = null
+
+    beforeEach(async () => {
+      const token = getToken('Alice', 'password')
+      columnId = (await createColumn('column', tableId, token)).body.id
+      rowId = (await createRow(tableId, token)).body.id
+    })
+
+    test('fails when not logged in', async () => {
+      await api
+        .put('/api/rows')
+        .send({ rowId, columnId, value: 'value' })
+        .expect(401)
+    })
+
+    test('fails as the wrong user', async () => {
+      const token = getToken('Bob', 'password')
+
+      await api
+        .put('/api/rows')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ rowId, columnId, value: 'value' })
+        .expect(403)
+    })
+
+    test('fails when no rowId is provided', async () => {
+      const token = getToken('Alice', 'password')
+
+      await api
+        .put('/api/rows')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ columnId, value: 'value' })
+        .expect(404)
+    })
+
+    test('fails when no columnId is provided', async () => {
+      const token = getToken('Alice', 'password')
+
+      await api
+        .put('/api/rows')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ rowId, value: 'value' })
+        .expect(404)
+    })
+
+    test('fails when no value is provided', async () => {
+      const token = getToken('Alice', 'password')
+
+      await api
+        .put('/api/rows')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ rowId, columnId })
+        .expect(404)
+    })
+
+    test('succeeds with valid data when logged in as the correct user', async () => {
+      const token = getToken('Alice', 'password')
+
+      await api
+        .put('/api/rows')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ rowId, columnId, value: 'value' })
+        .expect(200)
+    })
   })
 })
 
