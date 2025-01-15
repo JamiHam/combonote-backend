@@ -1,39 +1,8 @@
-const jwt = require('jsonwebtoken')
-const columnRouter = require('express').Router()
-const { User, Note, Table, Column } = require('../models')
+const router = require('express').Router()
 const { authorization } = require('../utils/auth')
+const columnController = require('../controllers/columns')
 
-columnRouter.get('/:tableId', async (request, response, next) => {
-  const table = await Table.findByPk(request.params.tableId, {
-    include: {
-      model: Column
-    }
-  })
+router.get('/:tableId', columnController.getColumns)
+router.post('/', authorization, columnController.createColumn)
 
-  if (!table) {
-    return response.status(404).json({ error: 'table does not exist' })
-  }
-
-  response.json(table.columns)
-})
-
-columnRouter.post('/', authorization, async (request, response, next) => {
-  const user = await User.findByPk(request.decodedToken.id)
-  const table = await Table.findByPk(request.body.tableId)
-
-  if (!table) {
-    return response.status(404).json({ error: 'table does not exist' })
-  }
-
-  const note = await Note.findByPk(table.noteId)
-
-  if (user.id !== note.userId) {
-    return response.status(403).end()
-  }
-
-  const column = await Column.create(request.body)
-
-  response.status(201).json(column)
-})
-
-module.exports = columnRouter
+module.exports = router
