@@ -1,26 +1,18 @@
-const jwt = require('jsonwebtoken')
 const tableRouter = require('express').Router()
 const { User, Note, Table } = require('../models')
-const { getTokenFrom } = require('../utils/authorization')
+const { authorization } = require('../utils/auth')
 
 tableRouter.get('/', async (request, response) => {
   const tables = await Table.findAll()
   response.json(tables)
 })
 
-tableRouter.post('/', async (request, response, next) => {
-  let decodedToken = null
-  try {
-    decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-  } catch (error) {
-    return next(error)
-  }
-
-  const user = await User.findByPk(decodedToken.id)
+tableRouter.post('/', authorization, async (request, response, next) => {
+  const user = await User.findByPk(request.decodedToken.id)
   const note = await Note.findByPk(request.body.noteId)
 
   if (!note) {
-    return response.status(404).send({ error: 'note does not exist' })
+    return response.status(404).json({ error: 'note does not exist' })
   }
 
   if (user.id !== note.userId) {
