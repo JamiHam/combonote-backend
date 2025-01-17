@@ -25,9 +25,9 @@ const createNote = async (name, token) => {
 
 const createTable = async (name, noteId, token) => {
   return await api
-    .post('/api/tables')
+    .post(`/api/tables/${noteId}`)
     .set('Authorization', `Bearer ${token}`)
-    .send({ name, noteId })
+    .send({ name })
 }
 
 const createColumn = async (name, tableId, token) => {

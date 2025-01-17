@@ -122,8 +122,8 @@ describe('table', async () => {
 
   test('cannot be created while not logged in', async () => {
     await api
-      .post('/api/tables')
-      .send({ name: 'table', noteId })
+      .post(`/api/tables/${noteId}`)
+      .send({ name: 'table' })
       .expect(401)
   })
 
@@ -131,9 +131,9 @@ describe('table', async () => {
     const token = await getToken('Bob', 'password')
 
     await api
-      .post('/api/tables')
+      .post(`/api/tables/${noteId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'table', noteId })
+      .send({ name: 'table' })
       .expect(403)
   })
 
@@ -142,9 +142,9 @@ describe('table', async () => {
     noteId += 1
 
     await api
-      .post('/api/tables')
+      .post(`/api/tables/${noteId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'table', noteId })
+      .send({ name: 'table' })
       .expect(404)
   })
 
@@ -152,9 +152,9 @@ describe('table', async () => {
     const token = await getToken('Alice', 'password')
 
     await api
-      .post('/api/tables')
+      .post(`/api/tables/${noteId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'table', noteId })
+      .send({ name: 'table' })
       .expect(201)
   })
 })
