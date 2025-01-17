@@ -32,9 +32,9 @@ const createTable = async (name, noteId, token) => {
 
 const createColumn = async (name, tableId, token) => {
   return await api
-    .post('/api/columns')
+    .post(`/api/columns/${tableId}`)
     .set('Authorization', `Bearer ${token}`)
-    .send({ name, tableId })
+    .send({ name })
 }
 
 const createRow = async (tableId, token) => {

@@ -173,8 +173,8 @@ describe('column', async () => {
 
   test('cannot be created while not logged in', async () => {
     await api
-      .post('/api/columns')
-      .send({ name: 'column', tableId })
+      .post(`/api/columns/${tableId}`)
+      .send({ name: 'column' })
       .expect(401)
   })
 
@@ -182,9 +182,9 @@ describe('column', async () => {
     const token = await getToken('Bob', 'password')
 
     await api
-      .post('/api/columns')
+      .post(`/api/columns/${tableId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'column', tableId })
+      .send({ name: 'column' })
       .expect(403)
   })
 
@@ -193,9 +193,9 @@ describe('column', async () => {
     tableId += 1
 
     await api
-      .post('/api/columns')
+      .post(`/api/columns/${tableId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'column', tableId })
+      .send({ name: 'column' })
       .expect(404)
   })
 
@@ -203,9 +203,9 @@ describe('column', async () => {
     const token = await getToken('Alice', 'password')
 
     await api
-      .post('/api/columns')
+      .post(`/api/columns/${tableId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'column', tableId })
+      .send({ name: 'column' })
       .expect(201)
   })
 
