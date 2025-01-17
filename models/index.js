@@ -17,8 +17,14 @@ Column.belongsTo(Table)
 Table.hasMany(Row)
 Row.belongsTo(Table)
 
-Row.belongsToMany(Column, { through: RowColumn })
-Column.belongsToMany(Row, { through: RowColumn })
+Row.hasMany(RowColumn)
+RowColumn.belongsTo(Row)
+
+Column.hasMany(RowColumn)
+RowColumn.belongsTo(Column)
+
+/*Row.belongsToMany(Column, { through: RowColumn })
+Column.belongsToMany(Row, { through: RowColumn })*/
 
 module.exports = {
   User,

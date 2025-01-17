@@ -248,39 +248,35 @@ describe('row', async () => {
 
   test('cannot be created while not logged in', async () => {
     await api
-      .post('/api/rows')
-      .send({ tableId })
+      .post(`/api/rows/${tableId}`)
       .expect(401)
   })
 
   test('can be added while logged in as the correct user', async () => {
-    const token = getToken('Alice', 'password')
+    const token = await getToken('Alice', 'password')
 
     await api
-      .post('/api/rows')
+      .post(`/api/rows/${tableId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ tableId })
       .expect(201)
   })
 
   test('cannot be added while logged in as the wrong user', async () => {
-    const token = getToken('Bob', 'password')
+    const token = await getToken('Bob', 'password')
 
     await api
-      .post('/api/rows')
+      .post(`/api/rows/${tableId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ tableId })
       .expect(403)
   })
 
   test('cannot be added when the specified table does not exist', async () => {
-    const token = getToken('Alice', 'password')
+    const token = await getToken('Alice', 'password')
     tableId += 1
 
     await api
-      .post('/api/rows')
+      .post(`/api/rows/${tableId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ tableId })
       .expect(404)
   })
 
@@ -289,65 +285,44 @@ describe('row', async () => {
     let rowId = null
 
     beforeEach(async () => {
-      const token = getToken('Alice', 'password')
+      const token = await getToken('Alice', 'password')
       columnId = (await createColumn('column', tableId, token)).body.id
       rowId = (await createRow(tableId, token)).body.id
     })
 
     test('fails when not logged in', async () => {
       await api
-        .put('/api/rows')
-        .send({ rowId, columnId, value: 'value' })
+        .put(`/api/rows/${rowId}/${columnId}`)
+        .send({ value: 'value' })
         .expect(401)
     })
 
     test('fails as the wrong user', async () => {
-      const token = getToken('Bob', 'password')
+      const token = await getToken('Bob', 'password')
 
       await api
-        .put('/api/rows')
+        .put(`/api/rows/${rowId}/${columnId}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ rowId, columnId, value: 'value' })
+        .send({ value: 'value' })
         .expect(403)
     })
 
-    test('fails when no rowId is provided', async () => {
-      const token = getToken('Alice', 'password')
-
-      await api
-        .put('/api/rows')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ columnId, value: 'value' })
-        .expect(404)
-    })
-
-    test('fails when no columnId is provided', async () => {
-      const token = getToken('Alice', 'password')
-
-      await api
-        .put('/api/rows')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ rowId, value: 'value' })
-        .expect(404)
-    })
-
     test('fails when no value is provided', async () => {
-      const token = getToken('Alice', 'password')
+      const token = await getToken('Alice', 'password')
 
       await api
-        .put('/api/rows')
+        .put(`/api/rows/${rowId}/${columnId}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ rowId, columnId })
-        .expect(404)
+        .expect(400)
     })
 
     test('succeeds with valid data when logged in as the correct user', async () => {
-      const token = getToken('Alice', 'password')
+      const token = await getToken('Alice', 'password')
 
       await api
-        .put('/api/rows')
+        .put(`/api/rows/${rowId}/${columnId}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ rowId, columnId, value: 'value' })
+        .send({ value: 'value' })
         .expect(200)
     })
   })

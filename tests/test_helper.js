@@ -39,9 +39,8 @@ const createColumn = async (name, tableId, token) => {
 
 const createRow = async (tableId, token) => {
   return await api
-    .post('/api/rows')
+    .post(`/api/rows/${tableId}`)
     .set('Authorization', `Bearer ${token}`)
-    .send({ tableId })
 }
 
 module.exports = {

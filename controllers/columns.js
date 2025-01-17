@@ -8,7 +8,7 @@ const getColumns = async (request, response, next) => {
   })
 
   if (!table) {
-    return response.status(404).json({ error: 'table does not exist' })
+    return response.status(404).json({ error: 'table not found' })
   }
 
   response.json(table.columns)
