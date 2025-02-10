@@ -1,3 +1,4 @@
+const cors = require('cors')
 const express = require('express')
 const app = express()
 
@@ -6,6 +7,7 @@ const { connect } = require('./utils/db')
 const middleware = require('./utils/middleware')
 const router = require('./routers')
 
+app.use(cors({ origin: 'http://localhost:5173' }))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
