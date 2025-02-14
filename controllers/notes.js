@@ -14,6 +14,10 @@ const getNotesFromUser = async (request, response) => {
     }
   })
 
+  if (!noteOwner) {
+    return response.status(404).end()
+  }
+
   if (user.id !== noteOwner.id) {
     return response.status(403).end()
   }
