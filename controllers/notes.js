@@ -5,6 +5,28 @@ const getNotes = async (request, response) => {
   response.json(notes)
 }
 
+const getNotesFromUser = async (request, response) => {
+  const user = await User.findByPk(request.decodedToken.id)
+
+  const noteOwner = await User.findOne({
+    where: {
+      username: request.params.user
+    }
+  })
+
+  if (user.id !== noteOwner.id) {
+    return response.status(403).end()
+  }
+
+  const notes = await Note.findAll({
+    where: {
+      userId: noteOwner.id
+    }
+  })
+
+  response.json(notes)
+}
+
 const createNote = async (request, response, next) => {
   const user = await User.findByPk(request.decodedToken.id)
   const note = Note.build(request.body)
@@ -21,5 +43,6 @@ const createNote = async (request, response, next) => {
 
 module.exports = {
   getNotes,
+  getNotesFromUser,
   createNote
 }

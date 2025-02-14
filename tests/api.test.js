@@ -108,6 +108,53 @@ describe('note', async () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(400)
   })
+
+  describe('fetching', async () => {
+    beforeEach(async () => {
+      await createUser('Bob', 'password')
+
+      let token = await getToken('Alice', 'password')
+      createNote("Alice's note", token)
+
+      token = await getToken('Bob', 'password')
+      createNote("Bob's note", token)
+    })
+
+    test('succeeds with notes created by the logged in user', async () => {
+      let token = await getToken('Alice', 'password')
+
+      let notes = await api
+        .get('/api/notes/Alice')
+        .set('Authorization', `Bearer ${token}`)
+
+      assert.strictEqual(notes.body.length, 1)
+      assert.equal(notes.body[0].name, "Alice's note")
+
+      token = await getToken('Bob', 'password')
+
+      notes = await api
+        .get('/api/notes/Bob')
+        .set('Authorization', `Bearer ${token}`)
+
+      assert.strictEqual(notes.body.length, 1)
+      assert.equal(notes.body[0].name, "Bob's note")
+    })
+
+    test('fails while logged in as the wrong user', async () => {
+      const token = await getToken('Alice', 'password')
+
+      await api
+        .get('/api/notes/Bob')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(403)
+    })
+
+    test('fails while not logged in', async () => {
+      const notes = await api
+        .get('/api/notes/Alice')
+        .expect(401)
+    })
+  })
 })
 
 describe('table', async () => {
