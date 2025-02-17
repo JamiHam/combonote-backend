@@ -1,4 +1,4 @@
-const { User, Note, Table, Column, Row, RowColumn } = require('../models')
+const { User, Document, Table, Column, Row, RowColumn } = require('../models')
 
 const getRows = async (request, response) => {
   const table = await Table.findByPk(request.params.tableId, {
@@ -25,9 +25,9 @@ const createRow = async (request, response) => {
     return response.status(404).json({ error: 'table not found' })
   }
 
-  const note = await Note.findByPk(table.noteId)
+  const document = await Document.findByPk(table.documentId)
 
-  if (user.id !== note.userId) {
+  if (user.id !== document.userId) {
     return response.status(403).end()
   }
 
@@ -52,9 +52,9 @@ const updateRow = async (request, response) => {
   }
 
   const table = await Table.findByPk(row.tableId) 
-  const note = await Note.findByPk(table.noteId)
+  const document = await Document.findByPk(table.documentId)
 
-  if (user.id !== note.userId) {
+  if (user.id !== document.userId) {
     return response.status(403).end()
   }
 

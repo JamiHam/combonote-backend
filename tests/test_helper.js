@@ -16,16 +16,16 @@ const createUser = async (username, password) => {
     .send({ username, password })
 }
 
-const createNote = async (name, token) => {
+const createDocument = async (name, token) => {
   return await api
-    .post('/api/notes')
+    .post('/api/documents')
     .set('Authorization', `Bearer ${token}`)
     .send({ name })
 }
 
-const createTable = async (name, noteId, token) => {
+const createTable = async (name, documentId, token) => {
   return await api
-    .post(`/api/tables/${noteId}`)
+    .post(`/api/tables/${documentId}`)
     .set('Authorization', `Bearer ${token}`)
     .send({ name })
 }
@@ -46,7 +46,7 @@ const createRow = async (tableId, token) => {
 module.exports = {
   getToken,
   createUser,
-  createNote,
+  createDocument,
   createTable,
   createColumn,
   createRow

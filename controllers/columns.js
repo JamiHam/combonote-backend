@@ -1,4 +1,4 @@
-const { User, Note, Table, Column } = require('../models')
+const { User, Document, Table, Column } = require('../models')
 
 const getColumns = async (request, response, next) => {
   const table = await Table.findByPk(request.params.tableId, {
@@ -25,9 +25,9 @@ const createColumn = async (request, response, next) => {
     return response.status(404).json({ error: 'table does not exist' })
   }
 
-  const note = await Note.findByPk(table.noteId)
+  const document = await Document.findByPk(table.documentId)
 
-  if (user.id !== note.userId) {
+  if (user.id !== document.userId) {
     return response.status(403).end()
   }
 

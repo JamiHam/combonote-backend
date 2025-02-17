@@ -19,7 +19,7 @@ module.exports = {
       }
     })
 
-    await queryInterface.createTable('notes', {
+    await queryInterface.createTable('documents', {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -31,7 +31,7 @@ module.exports = {
       }
     })
 
-    await queryInterface.addColumn('notes', 'user_id', {
+    await queryInterface.addColumn('documents', 'user_id', {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: 'users', key: 'id' }
@@ -49,10 +49,10 @@ module.exports = {
       }
     })
 
-    await queryInterface.addColumn('tables', 'note_id', {
+    await queryInterface.addColumn('tables', 'document_id', {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'notes', key: 'id' }
+      references: { model: 'documents', key: 'id' }
     })
 
     await queryInterface.createTable('columns', {
@@ -108,7 +108,7 @@ module.exports = {
     await queryInterface.dropTable('rows')
     await queryInterface.dropTable('columns')
     await queryInterface.dropTable('tables')
-    await queryInterface.dropTable('notes')
+    await queryInterface.dropTable('documents')
     await queryInterface.dropTable('users')
   }
 }

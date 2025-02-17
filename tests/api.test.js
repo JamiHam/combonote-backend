@@ -9,7 +9,7 @@ const { User } = require('../models')
 const {
   getToken,
   createUser,
-  createNote,
+  createDocument,
   createTable,
   createColumn,
   createRow
@@ -78,7 +78,7 @@ describe('login', async () => {
   })
 })
 
-describe('note', async () => {
+describe('document', async () => {
   beforeEach(async () => {
     await createUser('Alice', 'password')
   })
@@ -87,16 +87,16 @@ describe('note', async () => {
     const token = await getToken('Alice', 'password')
 
     await api
-      .post('/api/notes')
+      .post('/api/documents')
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'note' })
+      .send({ name: 'document' })
       .expect(201)
   })
 
   test ('cannot be created while logged out', async () => {
     await api
-      .post('/api/notes')
-      .send({ name: 'note' })
+      .post('/api/documents')
+      .send({ name: 'document' })
       .expect(401)
   })
 
@@ -104,7 +104,7 @@ describe('note', async () => {
     const token = await getToken('Alice', 'password')
 
     await api
-      .post('/api/notes')
+      .post('/api/documents')
       .set('Authorization', `Bearer ${token}`)
       .expect(400)
   })
@@ -114,62 +114,62 @@ describe('note', async () => {
       await createUser('Bob', 'password')
 
       let token = await getToken('Alice', 'password')
-      createNote("Alice's note", token)
+      createDocument("Alice's document", token)
 
       token = await getToken('Bob', 'password')
-      createNote("Bob's note", token)
+      createDocument("Bob's document", token)
     })
 
-    test('succeeds with notes created by the logged in user', async () => {
+    test('succeeds with documents created by the logged in user', async () => {
       let token = await getToken('Alice', 'password')
 
-      let notes = await api
-        .get('/api/notes/Alice')
+      let documents = await api
+        .get('/api/documents/Alice')
         .set('Authorization', `Bearer ${token}`)
 
-      assert.strictEqual(notes.body.length, 1)
-      assert.equal(notes.body[0].name, "Alice's note")
+      assert.strictEqual(documents.body.length, 1)
+      assert.equal(documents.body[0].name, "Alice's document")
 
       token = await getToken('Bob', 'password')
 
-      notes = await api
-        .get('/api/notes/Bob')
+      documents = await api
+        .get('/api/documents/Bob')
         .set('Authorization', `Bearer ${token}`)
 
-      assert.strictEqual(notes.body.length, 1)
-      assert.equal(notes.body[0].name, "Bob's note")
+      assert.strictEqual(documents.body.length, 1)
+      assert.equal(documents.body[0].name, "Bob's document")
     })
 
     test('fails while logged in as the wrong user', async () => {
       const token = await getToken('Alice', 'password')
 
       await api
-        .get('/api/notes/Bob')
+        .get('/api/documents/Bob')
         .set('Authorization', `Bearer ${token}`)
         .expect(403)
     })
 
     test('fails while not logged in', async () => {
-      const notes = await api
-        .get('/api/notes/Alice')
+      const documents = await api
+        .get('/api/documents/Alice')
         .expect(401)
     })
   })
 })
 
 describe('table', async () => {
-  let noteId = null
+  let documentId = null
 
   beforeEach(async () => {
     await createUser('Alice', 'password')
     await createUser('Bob', 'password')
     const token = await getToken('Alice', 'password')
-    noteId = (await createNote('note', token)).body.id
+    documentId = (await createDocument('document', token)).body.id
   })
 
   test('cannot be created while not logged in', async () => {
     await api
-      .post(`/api/tables/${noteId}`)
+      .post(`/api/tables/${documentId}`)
       .send({ name: 'table' })
       .expect(401)
   })
@@ -178,18 +178,18 @@ describe('table', async () => {
     const token = await getToken('Bob', 'password')
 
     await api
-      .post(`/api/tables/${noteId}`)
+      .post(`/api/tables/${documentId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'table' })
       .expect(403)
   })
 
-  test('cannot be created when the specified note does not exist', async () => {
+  test('cannot be created when the specified document does not exist', async () => {
     const token = await getToken('Alice', 'password')
-    noteId += 1
+    documentId += 1
 
     await api
-      .post(`/api/tables/${noteId}`)
+      .post(`/api/tables/${documentId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'table' })
       .expect(404)
@@ -199,7 +199,7 @@ describe('table', async () => {
     const token = await getToken('Alice', 'password')
 
     await api
-      .post(`/api/tables/${noteId}`)
+      .post(`/api/tables/${documentId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'table' })
       .expect(201)
@@ -207,15 +207,15 @@ describe('table', async () => {
 })
 
 describe('column', async () => {
-  let noteId = null
+  let documentId = null
   let tableId = null
 
   beforeEach(async () => {
     await createUser('Alice', 'password')
     await createUser('Bob', 'password')
     const token = await getToken('Alice', 'password')
-    noteId = (await createNote('note', token)).body.id
-    tableId = (await createTable('table', noteId, token)).body.id
+    documentId = (await createDocument('document', token)).body.id
+    tableId = (await createTable('table', documentId, token)).body.id
   })
 
   test('cannot be created while not logged in', async () => {
@@ -282,15 +282,15 @@ describe('column', async () => {
 })
 
 describe('row', async () => {
-  let noteId = null
+  let documentId = null
   let tableId = null
   
   beforeEach(async () => {
     await createUser('Alice', 'password')
     await createUser('Bob', 'password')
     const token = await getToken('Alice', 'password')
-    noteId = (await createNote('note', token)).body.id
-    tableId = (await createTable('table', noteId, token)).body.id
+    documentId = (await createDocument('document', token)).body.id
+    tableId = (await createTable('table', documentId, token)).body.id
   })
 
   test('cannot be created while not logged in', async () => {

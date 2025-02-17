@@ -1,15 +1,15 @@
 const User = require('./user')
-const Note = require('./note')
+const Document = require('./document')
 const Table = require('./table')
 const Column = require('./column')
 const Row = require('./row')
 const RowColumn = require('./row_column')
 
-User.hasMany(Note)
-Note.belongsTo(User)
+User.hasMany(Document)
+Document.belongsTo(User)
 
-Note.hasMany(Table)
-Table.belongsTo(Note)
+Document.hasMany(Table)
+Table.belongsTo(Document)
 
 Table.hasMany(Column)
 Column.belongsTo(Table)
@@ -28,7 +28,7 @@ Column.belongsToMany(Row, { through: RowColumn })*/
 
 module.exports = {
   User,
-  Note,
+  Document,
   Table,
   Column,
   Row,

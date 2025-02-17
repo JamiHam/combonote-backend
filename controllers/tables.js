@@ -1,4 +1,4 @@
-const { User, Note, Table } = require('../models')
+const { User, Document, Table } = require('../models')
 
 const getTables = async (request, response) => {
   const tables = await Table.findAll()
@@ -7,20 +7,20 @@ const getTables = async (request, response) => {
 
 const createTable = async (request, response, next) => {
   const { name } = request.body
-  const { noteId } = request.params
+  const { documentId } = request.params
 
   const user = await User.findByPk(request.decodedToken.id)
-  const note = await Note.findByPk(noteId)
+  const document = await Document.findByPk(documentId)
 
-  if (!note) {
-    return response.status(404).json({ error: 'note does not exist' })
+  if (!document) {
+    return response.status(404).json({ error: 'document does not exist' })
   }
 
-  if (user.id !== note.userId) {
+  if (user.id !== document.userId) {
     return response.status(403).end()
   }
 
-  const table = await Table.create({ name, noteId })
+  const table = await Table.create({ name, documentId })
 
   response.status(201).json(table)
 }
