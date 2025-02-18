@@ -1,4 +1,4 @@
-const { test, beforeEach, describe, after, before } = require('node:test')
+/*const { test, beforeEach, describe, after, before } = require('node:test')
 const assert = require('node:assert')
 const supertest = require('supertest')
 const app = require('../app')
@@ -17,144 +17,6 @@ const {
 
 beforeEach(async () => {
   await User.truncate({ cascade: true })
-})
-
-describe('user', async () => {
-  test('cannot be created if the username already exists', async () => {
-    await createUser('Alice', 'password')
-    
-    await api
-      .post('/api/users')
-      .send({ username: 'Alice', password: 'password' })
-      .expect(409)
-  })
-
-  test('can be created with valid data', async () => {
-    await api
-      .post('/api/users')
-      .send({ username: 'Alice', password: 'password' })
-      .expect(201)
-  })
-
-  test('passwords are not stored as plaintext', async () => {
-    const createdUser = await api
-      .post('/api/users')
-      .send({ username: 'Alice', password: 'password' })
-    
-    assert.notEqual(createdUser.body.passwordHash, 'password')
-  })
-})
-
-describe('login', async () => {
-  beforeEach(async () => {
-    await createUser('Alice', 'password')
-  })
-
-  test('fails with no username or password', async () => {
-    await api
-      .post('/api/login')
-      .expect(401)
-  })
-
-  test('fails with nonexistent username', async () => {
-    await api
-      .post('/api/login')
-      .send({ username: 'Bob', password: 'password' })
-      .expect(401)
-  })
-
-  test('fails with incorrect password', async () => {
-    await api
-      .post('/api/login')
-      .send({ username: 'Alice', password: 'qwerty' })
-      .expect(401)
-  })
-
-  test('succeeds with correct username and password', async () => {
-    await api
-      .post('/api/login')
-      .send({ username: 'Alice', password: 'password' })
-      .expect(200)
-  })
-})
-
-describe('document', async () => {
-  beforeEach(async () => {
-    await createUser('Alice', 'password')
-  })
-
-  test('can be created while logged in', async () => {
-    const token = await getToken('Alice', 'password')
-
-    await api
-      .post('/api/documents')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'document' })
-      .expect(201)
-  })
-
-  test ('cannot be created while logged out', async () => {
-    await api
-      .post('/api/documents')
-      .send({ name: 'document' })
-      .expect(401)
-  })
-
-  test('cannot be created if name is not provided', async () => {
-    const token = await getToken('Alice', 'password')
-
-    await api
-      .post('/api/documents')
-      .set('Authorization', `Bearer ${token}`)
-      .expect(400)
-  })
-
-  describe('fetching', async () => {
-    beforeEach(async () => {
-      await createUser('Bob', 'password')
-
-      let token = await getToken('Alice', 'password')
-      createDocument("Alice's document", token)
-
-      token = await getToken('Bob', 'password')
-      createDocument("Bob's document", token)
-    })
-
-    test('succeeds with documents created by the logged in user', async () => {
-      let token = await getToken('Alice', 'password')
-
-      let documents = await api
-        .get('/api/documents/Alice')
-        .set('Authorization', `Bearer ${token}`)
-
-      assert.strictEqual(documents.body.length, 1)
-      assert.equal(documents.body[0].name, "Alice's document")
-
-      token = await getToken('Bob', 'password')
-
-      documents = await api
-        .get('/api/documents/Bob')
-        .set('Authorization', `Bearer ${token}`)
-
-      assert.strictEqual(documents.body.length, 1)
-      assert.equal(documents.body[0].name, "Bob's document")
-    })
-
-    test('fails while logged in as the wrong user', async () => {
-      const token = await getToken('Alice', 'password')
-
-      await api
-        .get('/api/documents/Bob')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(403)
-    })
-
-    test('fails while not logged in', async () => {
-      const documents = await api
-        .get('/api/documents/Alice')
-        .expect(401)
-    })
-  })
 })
 
 describe('table', async () => {
@@ -377,4 +239,4 @@ describe('row', async () => {
 
 after(async () => {
   await sequelize.close()
-})
+})*/

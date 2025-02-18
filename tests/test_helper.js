@@ -11,7 +11,7 @@ const getToken = async (username, password) => {
 }
 
 const createUser = async (username, password) => {
-  await api
+  return await api
     .post('/api/users')
     .send({ username, password })
 }
