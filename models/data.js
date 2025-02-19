@@ -1,9 +1,9 @@
 const { Model, DataTypes } = require('sequelize')
 const { sequelize } = require('../utils/db')
 
-class RowColumn extends Model {}
+class Data extends Model {}
 
-RowColumn.init({
+Data.init({
   rowId: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -21,7 +21,7 @@ RowColumn.init({
   sequelize,
   underscored: true,
   timestamps: false,
-  modelName: 'row_column'
+  modelName: 'data'
 })
 
-module.exports = RowColumn
+module.exports = Data

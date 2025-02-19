@@ -1,11 +1,11 @@
-const { User, Document, Table, Column, Row, RowColumn } = require('../models')
+const { User, Document, Table, Column, Row, Data } = require('../models')
 
 const getRows = async (request, response) => {
   const table = await Table.findByPk(request.params.tableId, {
     include: {
       model: Row,
       include: {
-        model: RowColumn
+        model: Data
       }
     }
   })
@@ -64,20 +64,20 @@ const updateRow = async (request, response) => {
     return response.status(404).json({ error: 'column not found' })
   }
 
-  let rowColumn = await RowColumn.findOne({
+  let data = await Data.findOne({
     where: {
       rowId,
       columnId
     }
   })
 
-  if (!rowColumn) {
-    rowColumn = await RowColumn.create({ rowId, columnId })
+  if (!data) {
+    data = await Data.create({ rowId, columnId })
   }
 
-  rowColumn.value = value
-  await rowColumn.save()
-  response.json(rowColumn)
+  data.value = value
+  await data.save()
+  response.json(data)
 }
 
 module.exports = {

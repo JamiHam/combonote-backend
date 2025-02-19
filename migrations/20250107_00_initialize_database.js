@@ -87,7 +87,7 @@ module.exports = {
       references: { model: 'tables', key: 'id' }
     })
 
-    await queryInterface.createTable('row_columns', {
+    await queryInterface.createTable('data', {
       row_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -104,7 +104,7 @@ module.exports = {
     })
   },
   down: async ({ context: queryInterface }) => {
-    await queryInterface.dropTable('row_columns')
+    await queryInterface.dropTable('data')
     await queryInterface.dropTable('rows')
     await queryInterface.dropTable('columns')
     await queryInterface.dropTable('tables')

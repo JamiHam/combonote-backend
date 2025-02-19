@@ -3,7 +3,7 @@ const Document = require('./document')
 const Table = require('./table')
 const Column = require('./column')
 const Row = require('./row')
-const RowColumn = require('./row_column')
+const Data = require('./data')
 
 User.hasMany(Document)
 Document.belongsTo(User)
@@ -17,14 +17,14 @@ Column.belongsTo(Table)
 Table.hasMany(Row)
 Row.belongsTo(Table)
 
-Row.hasMany(RowColumn)
-RowColumn.belongsTo(Row)
+Row.hasMany(Data)
+Data.belongsTo(Row)
 
-Column.hasMany(RowColumn)
-RowColumn.belongsTo(Column)
+Column.hasMany(Data)
+Data.belongsTo(Column)
 
-/*Row.belongsToMany(Column, { through: RowColumn })
-Column.belongsToMany(Row, { through: RowColumn })*/
+/*Row.belongsToMany(Column, { through: Data })
+Column.belongsToMany(Row, { through: Data })*/
 
 module.exports = {
   User,
@@ -32,5 +32,5 @@ module.exports = {
   Table,
   Column,
   Row,
-  RowColumn
+  Data
 }
