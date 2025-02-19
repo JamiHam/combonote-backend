@@ -1,19 +1,18 @@
-const { beforeEach, after } = require('mocha')
+const { beforeEach } = require('mocha')
 const assert = require('node:assert')
 
 const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
-const { sequelize } = require('../utils/db')
 
 const { User } = require('../models')
-const { createUser } = require('./test_helper')
-
-beforeEach(async () => {
-  await User.truncate({ cascade: true })
-})
+const { resetDatabase, createUser } = require('./test_helper')
 
 describe('user', () => {
+  beforeEach(async () => {
+    await resetDatabase()
+  })
+
   describe('create', () => {
     it('should fail if the username already exists',  async () => {
       await createUser('Alice', 'password')
@@ -40,8 +39,4 @@ describe('user', () => {
       assert.notEqual(createdUser.body.passwordHash, 'password')
     })
   })
-})
-
-after(async () => {
-  await User.truncate({ cascade: true })
 })

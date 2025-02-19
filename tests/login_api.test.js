@@ -1,19 +1,13 @@
-const { beforeEach, after } = require('mocha');
-
+const { beforeEach } = require('mocha');
 const supertest = require('supertest');
 const app = require('../app')
 const api = supertest(app)
-const { sequelize } = require('../utils/db')
 
-const { User } = require('../models')
-const { createUser } = require('./test_helper')
-
-beforeEach(async () => {
-  await User.truncate({ cascade: true })
-})
+const { resetDatabase, createUser } = require('./test_helper')
 
 describe('login', () => {
   beforeEach(async () => {
+    await resetDatabase()
     await createUser('Alice', 'password')
   })
 
@@ -43,8 +37,4 @@ describe('login', () => {
       .send({ username: 'Alice', password: 'password' })
       .expect(200)
   })
-})
-
-after(async () => {
-  await User.truncate({ cascade: true })
 })
